@@ -1,9 +1,7 @@
 ﻿param (
     [Parameter(Mandatory = $true)][string]$family,
     [switch]$bold = $false,
-    [switch]$italic = $false,
-    [switch]$underline = $false,
-    [switch]$strikeout = $false
+    [switch]$italic = $false
 )
 
 Add-Type -AssemblyName System.Drawing
@@ -43,14 +41,6 @@ if ($bold) {
 
 if ($italic) {
     $style = $style -bor [System.Drawing.FontStyle]::Italic
-}
-
-if ($underline) {
-    $style = $style -bor [System.Drawing.FontStyle]::Underline
-}
-
-if ($strikeout) {
-    $style = $style -bor [System.Drawing.FontStyle]::Strikeout
 }
 
 $font = [System.Drawing.Font]::new($family, 10, $style)

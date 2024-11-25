@@ -84,12 +84,7 @@ export class PdfGenerator {
       // TODO handle fonts that are not found
       doc.registerFont(
         options.key,
-        await getFontData(
-          options.fontFamily,
-          options.bold,
-          options.italic,
-          options.underline,
-        ),
+        await getFontData(options.fontFamily, options.bold, options.italic),
       );
     }
   }

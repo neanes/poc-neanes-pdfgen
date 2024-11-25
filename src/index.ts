@@ -47,12 +47,7 @@ async function registerOtherFonts(score: Score) {
     // TODO handle fonts that are not found
     TextMeasurementService.registerFontByBuffer(
       options.key,
-      await getFontData(
-        options.fontFamily,
-        options.bold,
-        options.italic,
-        options.underline,
-      ),
+      await getFontData(options.fontFamily, options.bold, options.italic),
     );
   }
 }

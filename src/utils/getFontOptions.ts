@@ -12,7 +12,6 @@ export class FontOptions {
   fontFamily: string = '';
   italic: boolean = false;
   bold: boolean = false;
-  underline: boolean = false;
 
   get key(): string {
     let key = this.fontFamily;
@@ -23,10 +22,6 @@ export class FontOptions {
 
     if (this.italic) {
       key += ' Italic';
-    }
-
-    if (this.underline) {
-      key += ' Underline';
     }
 
     return key;
@@ -41,7 +36,6 @@ export function getFontOptionsFromElement(element: ScoreElement) {
     options.fontFamily = textBox.fontFamily;
     options.bold = textBox.bold;
     options.italic = textBox.italic;
-    options.underline = textBox.underline;
     return options;
   } else if (element.elementType === ElementType.DropCap) {
     const dropCap = element as DropCapElement;
@@ -58,7 +52,6 @@ export function getFontOptionsFromElement(element: ScoreElement) {
     options.fontFamily = note.lyricsFontFamily;
     options.bold = note.lyricsFontStyle === '700';
     options.italic = note.lyricsFontStyle === 'italic';
-    options.underline = note.lyricsTextDecoration === 'underline';
     return options;
   } else {
     throw new Error(`Unsupported type ${element.elementType}`);
