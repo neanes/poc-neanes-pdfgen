@@ -1,3 +1,5 @@
+import { defaultFonts } from './defaultFonts';
 import { getFontData } from './getFontData';
+import { getFontOptionsForScore } from './getFontOptions';
 
-export { getFontData };
+export { defaultFonts, getFontData, getFontOptionsForScore };

@@ -10,7 +10,7 @@ export async function getFontData(
   underline: boolean = false,
   strikeout: boolean = false,
 ): Promise<Buffer> {
-  let cmd = `powershell -File .\\GetFontData.ps1 -family "${family}"`;
+  let cmd = `powershell -File .\\src\\utils\\GetFontData.ps1 -family "${family}"`;
 
   if (bold) {
     cmd += ' -bold';

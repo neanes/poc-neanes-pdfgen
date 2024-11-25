@@ -2,8 +2,6 @@ import fs from 'fs';
 
 import PDFDocument from 'pdfkit';
 
-import { getFontData } from './utils/getFontData';
-
 import { Neume } from './support/neanes/models/Neumes';
 import { NeumeMappingService } from './support/neanes/services/NeumeMappingService';
 import { VocalExpressionNeume } from './support/neanes/models/Neumes';
@@ -20,6 +18,7 @@ import { PageSetup } from './support/neanes/models/PageSetup';
 
 import { Score } from './support/neanes/models/Score';
 import { Page } from './support/neanes/models/Page';
+import { defaultFonts, getFontData, getFontOptionsForScore } from './utils';
 
 export class PdfGenerator {
   public async generate(score: Score, pages: Page[]) {
@@ -29,25 +28,14 @@ export class PdfGenerator {
 
     doc.pipe(fs.createWriteStream('output.pdf')); // write to PDF
 
+    console.time('pdfkit: register fonts');
     this.registerDefaultFonts(doc);
-
-    doc.registerFont(
-      'Palatino Linotype',
-      await getFontData('Palatino LinoType'),
-    );
-
-    doc.registerFont(
-      'Palatino Linotype Italic',
-      await getFontData('Palatino LinoType', false, true),
-    );
-
-    doc.registerFont(
-      'Palatino Linotype Bold',
-      await getFontData('Palatino LinoType', true),
-    );
+    await this.registerOtherFonts(doc, score);
+    console.timeEnd('pdfkit: register fonts');
 
     let firstPage = true;
 
+    console.time('generate: main loop');
     for (const page of pages) {
       if (!firstPage && page.lines.length > 1) {
         doc.addPage();
@@ -73,6 +61,7 @@ export class PdfGenerator {
         }
       }
     }
+    console.timeEnd('generate: main loop');
 
     // finalize the PDF and end the stream
     doc.end();
@@ -81,17 +70,28 @@ export class PdfGenerator {
   }
 
   private registerDefaultFonts(doc: PDFKit.PDFDocument) {
-    doc.registerFont('Neanes', 'support/neanes/assets/Neanes.otf');
-    doc.registerFont('Omega', 'support/neanes/assets/EZ Omega.ttf');
-    doc.registerFont('Omega Italic', 'support/neanes/assets/EZ Omega.ttf');
-    doc.registerFont(
-      'Source Serif',
-      'support/neanes/assets/SourceSerif4-Regular.otf',
-    );
-    doc.registerFont(
-      'PFGoudyInitials',
-      'support/neanes/assets/PFGoudyInitials.ttf',
-    );
+    for (const [family, file] of defaultFonts.entries()) {
+      doc.registerFont(family, file);
+    }
+  }
+
+  private async registerOtherFonts(doc: PDFKit.PDFDocument, score: Score) {
+    for (const options of getFontOptionsForScore(score)) {
+      if (defaultFonts.has(options.key)) {
+        continue;
+      }
+
+      // TODO handle fonts that are not found
+      doc.registerFont(
+        options.key,
+        await getFontData(
+          options.fontFamily,
+          options.bold,
+          options.italic,
+          options.underline,
+        ),
+      );
+    }
   }
 
   private renderNote(

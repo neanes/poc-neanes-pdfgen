@@ -6,6 +6,9 @@ import JSZip from 'jszip';
 import { SaveService } from './support/neanes/services/SaveService';
 import { LayoutService } from './support/neanes/services/LayoutService';
 import { PdfGenerator } from './PdfGenerator';
+import { TextMeasurementService } from './support/neanes/services/TextMeasurementService';
+import { defaultFonts, getFontData, getFontOptionsForScore } from './utils';
+import { Score } from './support/neanes/models/Score';
 
 async function readScoreFile(filePath: string) {
   let data: string;
@@ -24,10 +27,45 @@ async function readScoreFile(filePath: string) {
   return data;
 }
 
+async function registerDefaultFonts() {
+  const promises: Promise<void>[] = [];
+  for (const [family, file] of defaultFonts.entries()) {
+    promises.push(TextMeasurementService.registerFontByPath(family, file));
+  }
+
+  await Promise.all(promises);
+}
+
+async function registerOtherFonts(score: Score) {
+  for (const options of getFontOptionsForScore(score)) {
+    if (defaultFonts.has(options.key)) {
+      continue;
+    }
+
+    console.log(`Registering ${options.key}`);
+
+    // TODO handle fonts that are not found
+    TextMeasurementService.registerFontByBuffer(
+      options.key,
+      await getFontData(
+        options.fontFamily,
+        options.bold,
+        options.italic,
+        options.underline,
+      ),
+    );
+  }
+}
+
 if (process.argv[2]) {
   const score = SaveService.LoadScoreFromJson(
     JSON.parse(await readScoreFile(process.argv[2])),
   );
+
+  console.time('fontkit: register fonts');
+  await registerDefaultFonts();
+  await registerOtherFonts(score);
+  console.timeEnd('fontkit: register fonts');
 
   const pages = LayoutService.processPages(score);
 
