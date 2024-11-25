@@ -12,15 +12,18 @@ import { Font, openSync } from 'fontkit';
 
 const fontMap = new Map<string, Font>();
 
-fontMap.set('Neanes', openSync('neanes/assets/Neanes.otf') as Font);
-fontMap.set('Omega', openSync('neanes/assets/EZ Omega.ttf') as Font);
+fontMap.set('Neanes', openSync('src/support/neanes/assets/Neanes.otf') as Font);
+fontMap.set(
+  'Omega',
+  openSync('src/support/neanes/assets/EZ Omega.ttf') as Font,
+);
 fontMap.set(
   'PFGoudyInitials',
-  openSync('neanes/assets/PFGoudyInitials.ttf') as Font,
+  openSync('src/support/neanes/assets/PFGoudyInitials.ttf') as Font,
 );
 fontMap.set(
   'Source Serif',
-  openSync('neanes/assets/SourceSerif4-Regular.otf') as Font,
+  openSync('src/support/neanes/assets/SourceSerif4-Regular.otf') as Font,
 );
 
 fontMap.set('Palatino Linotype', openSync('C:/Windows/Fonts/pala.ttf') as Font);

@@ -3,16 +3,9 @@ import path from 'path';
 
 import JSZip from 'jszip';
 
-import { SaveService } from './neanes/services/SaveService';
-import { LayoutService } from './neanes/services/LayoutService';
+import { SaveService } from './support/neanes/services/SaveService';
+import { LayoutService } from './support/neanes/services/LayoutService';
 import { PdfGenerator } from './PdfGenerator';
-
-//const red = "#800000";
-// const red = "#CD1041";
-// const pageSetup = new PageSetup();
-// pageSetup.lyricsDefaultFontFamily = "Omega";
-// pageSetup.neumeDefaultFontFamily = "Neanes";
-// pageSetup.neumeDefaultFontSize = 20;
 
 async function readScoreFile(filePath: string) {
   let data: string;

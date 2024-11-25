@@ -1,6 +1,7 @@
 {
   "type": "module",
   "scripts": {
+    "start": "npx tsx src/index.ts",
     "prettier": "prettier --write \"./**/*.{ts,js,vue}\""
   },
   "dependencies": {
@@ -11,6 +12,7 @@
   "devDependencies": {
     "@types/fontkit": "^2.0.7",
     "@types/node": "^22.9.0",
+    "@types/pdfkit": "^0.13.6",
     "prettier": "^3.3.3"
   }
 }

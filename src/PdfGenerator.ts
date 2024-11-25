@@ -2,24 +2,24 @@ import fs from 'fs';
 
 import PDFDocument from 'pdfkit';
 
-import { getFontData } from './getFontData';
+import { getFontData } from './utils/getFontData';
 
-import { Neume } from './neanes/models/Neumes';
-import { NeumeMappingService } from './neanes/services/NeumeMappingService';
-import { VocalExpressionNeume } from './neanes/models/Neumes';
-import { fontService } from './neanes/services/FontService';
+import { Neume } from './support/neanes/models/Neumes';
+import { NeumeMappingService } from './support/neanes/services/NeumeMappingService';
+import { VocalExpressionNeume } from './support/neanes/models/Neumes';
+import { fontService } from './support/neanes/services/FontService';
 import {
   DropCapElement,
   ElementType,
   MartyriaElement,
   NoteElement,
   TextBoxElement,
-} from './neanes/models/Element';
-import { Unit } from './neanes/utils/Unit';
-import { PageSetup } from './neanes/models/PageSetup';
+} from './support/neanes/models/Element';
+import { Unit } from './support/neanes/utils/Unit';
+import { PageSetup } from './support/neanes/models/PageSetup';
 
-import { Score } from './neanes/models/Score';
-import { Page } from './neanes/models/Page';
+import { Score } from './support/neanes/models/Score';
+import { Page } from './support/neanes/models/Page';
 
 export class PdfGenerator {
   public async generate(score: Score, pages: Page[]) {
@@ -81,11 +81,17 @@ export class PdfGenerator {
   }
 
   private registerDefaultFonts(doc: PDFKit.PDFDocument) {
-    doc.registerFont('Neanes', 'neanes/assets/Neanes.otf');
-    doc.registerFont('Omega', 'neanes/assets/EZ Omega.ttf');
-    doc.registerFont('Omega Italic', 'neanes/assets/EZ Omega.ttf');
-    doc.registerFont('Source Serif', 'neanes/assets/SourceSerif4-Regular.otf');
-    doc.registerFont('PFGoudyInitials', 'neanes/assets/PFGoudyInitials.ttf');
+    doc.registerFont('Neanes', 'support/neanes/assets/Neanes.otf');
+    doc.registerFont('Omega', 'support/neanes/assets/EZ Omega.ttf');
+    doc.registerFont('Omega Italic', 'support/neanes/assets/EZ Omega.ttf');
+    doc.registerFont(
+      'Source Serif',
+      'support/neanes/assets/SourceSerif4-Regular.otf',
+    );
+    doc.registerFont(
+      'PFGoudyInitials',
+      'support/neanes/assets/PFGoudyInitials.ttf',
+    );
   }
 
   private renderNote(
