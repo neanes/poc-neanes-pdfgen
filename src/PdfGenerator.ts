@@ -2,9 +2,12 @@ import fs from 'fs';
 
 import PDFDocument from 'pdfkit';
 
-import { Neume } from './support/neanes/models/Neumes';
+import {
+  Neume,
+  TimeNeume,
+  VocalExpressionNeume,
+} from './support/neanes/models/Neumes';
 import { NeumeMappingService } from './support/neanes/services/NeumeMappingService';
-import { VocalExpressionNeume } from './support/neanes/models/Neumes';
 import { fontService } from './support/neanes/services/FontService';
 import {
   DropCapElement,
@@ -131,7 +134,15 @@ export class PdfGenerator {
 
     let mainText = this.getMapping(note.quantitativeNeume).text;
 
-    if (note.vocalExpressionNeume) {
+    if (
+      note.vocalExpressionNeume &&
+      ![
+        VocalExpressionNeume.Heteron,
+        VocalExpressionNeume.HeteronConnecting,
+        VocalExpressionNeume.HeteronConnectingLong,
+        VocalExpressionNeume.Endofonon,
+      ].includes(note.vocalExpressionNeume)
+    ) {
       mainText += this.getMapping(note.vocalExpressionNeume).text;
     }
 
@@ -139,69 +150,194 @@ export class PdfGenerator {
       lineBreak: false,
     });
 
-    if (note.gorgonNeume) {
-      const offset = this.getOffset(fontFamily, note, note.gorgonNeume);
+    if (
+      note.vocalExpressionNeume != null &&
+      [
+        VocalExpressionNeume.Heteron,
+        VocalExpressionNeume.HeteronConnecting,
+        VocalExpressionNeume.HeteronConnectingLong,
+        VocalExpressionNeume.Endofonon,
+      ].includes(note.vocalExpressionNeume)
+    ) {
+      this.renderNotePartial(
+        doc,
+        note,
+        note.vocalExpressionNeume,
+        note.vocalExpressionNeumeOffsetX,
+        note.vocalExpressionNeumeOffsetY,
+        fontFamily,
+        fontSize,
+        pageSetup.heteronDefaultColor,
+      );
+    }
 
-      doc
-        .fillColor(pageSetup.gorgonDefaultColor)
-        .text(
-          this.getMapping(note.gorgonNeume).text,
-          Unit.toPt(note.x) + offset.x * fontSize,
-          Unit.toPt(note.y) + offset.y * fontSize,
-          { lineBreak: false },
-        );
+    if (note.gorgonNeume) {
+      this.renderNotePartial(
+        doc,
+        note,
+        note.gorgonNeume,
+        note.gorgonNeumeOffsetX,
+        note.gorgonNeumeOffsetY,
+        fontFamily,
+        fontSize,
+        pageSetup.gorgonDefaultColor,
+      );
+    }
+
+    if (note.secondaryGorgonNeume) {
+      this.renderNotePartial(
+        doc,
+        note,
+        note.secondaryGorgonNeume,
+        note.secondaryGorgonNeumeOffsetX,
+        note.secondaryGorgonNeumeOffsetY,
+        fontFamily,
+        fontSize,
+        pageSetup.gorgonDefaultColor,
+      );
     }
 
     if (note.timeNeume) {
-      const offset = this.getOffset(fontFamily, note, note.timeNeume);
+      this.renderNotePartial(
+        doc,
+        note,
+        note.timeNeume,
+        note.timeNeumeOffsetX,
+        note.timeNeumeOffsetY,
+        fontFamily,
+        fontSize,
+        color,
+      );
+    }
 
-      doc
-        .fillColor(color)
-        .text(
-          this.getMapping(note.timeNeume).text,
-          Unit.toPt(note.x) + offset.x * fontSize,
-          Unit.toPt(note.y) + offset.y * fontSize,
-          { lineBreak: false },
-        );
+    if (note.koronis) {
+      this.renderNotePartial(
+        doc,
+        note,
+        TimeNeume.Koronis,
+        note.koronisOffsetX,
+        note.koronisOffsetY,
+        fontFamily,
+        fontSize,
+        pageSetup.koronisDefaultColor,
+      );
     }
 
     if (note.accidental) {
-      const offset = this.getOffset(fontFamily, note, note.accidental);
+      this.renderNotePartial(
+        doc,
+        note,
+        note.accidental,
+        note.accidentalOffsetX,
+        note.accidentalOffsetY,
+        fontFamily,
+        fontSize,
+        pageSetup.accidentalDefaultColor,
+      );
+    }
 
-      doc
-        .fillColor(pageSetup.accidentalDefaultColor)
-        .text(
-          this.getMapping(note.accidental).text,
-          Unit.toPt(note.x) + offset.x * fontSize,
-          Unit.toPt(note.y) + offset.y * fontSize,
-          { lineBreak: false },
-        );
+    if (note.secondaryAccidental) {
+      this.renderNotePartial(
+        doc,
+        note,
+        note.secondaryAccidental,
+        note.secondaryAccidentalOffsetX,
+        note.secondaryAccidentalOffsetY,
+        fontFamily,
+        fontSize,
+        pageSetup.accidentalDefaultColor,
+      );
+    }
+
+    if (note.tertiaryAccidental) {
+      this.renderNotePartial(
+        doc,
+        note,
+        note.tertiaryAccidental,
+        note.tertiaryAccidentalOffsetX,
+        note.tertiaryAccidentalOffsetY,
+        fontFamily,
+        fontSize,
+        pageSetup.accidentalDefaultColor,
+      );
+    }
+
+    if (note.fthora) {
+      this.renderNotePartial(
+        doc,
+        note,
+        note.fthora,
+        note.fthoraOffsetX,
+        note.fthoraOffsetY,
+        fontFamily,
+        fontSize,
+        pageSetup.fthoraDefaultColor,
+      );
+    }
+
+    if (note.secondaryFthora) {
+      this.renderNotePartial(
+        doc,
+        note,
+        note.secondaryFthora,
+        note.secondaryFthoraOffsetX,
+        note.secondaryFthoraOffsetY,
+        fontFamily,
+        fontSize,
+        pageSetup.fthoraDefaultColor,
+      );
+    }
+
+    if (note.tertiaryFthora) {
+      this.renderNotePartial(
+        doc,
+        note,
+        note.tertiaryFthora,
+        note.tertiaryFthoraOffsetX,
+        note.tertiaryFthoraOffsetY,
+        fontFamily,
+        fontSize,
+        pageSetup.fthoraDefaultColor,
+      );
+    }
+
+    if (note.noteIndicator && note.noteIndicatorNeume != null) {
+      this.renderNotePartial(
+        doc,
+        note,
+        note.noteIndicatorNeume,
+        note.noteIndicatorOffsetX,
+        note.noteIndicatorOffsetY,
+        fontFamily,
+        fontSize,
+        pageSetup.noteIndicatorDefaultColor,
+      );
     }
 
     if (note.ison) {
-      const offset = this.getOffset(fontFamily, note, note.ison);
-
-      doc
-        .fillColor(pageSetup.isonDefaultColor)
-        .text(
-          this.getMapping(note.ison).text,
-          Unit.toPt(note.x) + offset.x * fontSize,
-          Unit.toPt(note.y) + offset.y * fontSize,
-          { lineBreak: false },
-        );
+      this.renderNotePartial(
+        doc,
+        note,
+        note.ison,
+        note.isonOffsetX,
+        note.isonOffsetY,
+        fontFamily,
+        fontSize,
+        pageSetup.isonDefaultColor,
+      );
     }
 
     if (note.measureNumber) {
-      const offset = this.getOffset(fontFamily, note, note.measureNumber);
-
-      doc
-        .fillColor(pageSetup.measureNumberDefaultColor)
-        .text(
-          this.getMapping(note.measureNumber).text,
-          Unit.toPt(note.x) + offset.x * fontSize,
-          Unit.toPt(note.y) + offset.y * fontSize,
-          { lineBreak: false },
-        );
+      this.renderNotePartial(
+        doc,
+        note,
+        note.measureNumber,
+        note.measureNumberOffsetX,
+        note.measureNumberOffsetY,
+        fontFamily,
+        fontSize,
+        pageSetup.measureNumberDefaultColor,
+      );
     }
 
     if (note.measureBarRight) {
@@ -218,6 +354,19 @@ export class PdfGenerator {
           Unit.toPt(note.y),
           { lineBreak: false },
         );
+    }
+
+    if (note.tie) {
+      this.renderNotePartial(
+        doc,
+        note,
+        note.tie,
+        note.tieOffsetX,
+        note.tieOffsetY,
+        fontFamily,
+        fontSize,
+        pageSetup.neumeDefaultColor,
+      );
     }
 
     if (note.lyrics) {
@@ -303,6 +452,31 @@ export class PdfGenerator {
         }
       }
     }
+  }
+
+  private renderNotePartial(
+    doc: PDFKit.PDFDocument,
+    note: NoteElement,
+    neume: Neume,
+    offsetX: number | null,
+    offsetY: number | null,
+    fontFamily: string,
+    fontSize: number,
+    color: string,
+  ) {
+    const offset = this.getOffset(fontFamily, note, neume);
+
+    offset.x += offsetX || 0;
+    offset.y += offsetY || 0;
+
+    doc
+      .fillColor(color)
+      .text(
+        this.getMapping(neume).text,
+        Unit.toPt(note.x) + offset.x * fontSize,
+        Unit.toPt(note.y) + offset.y * fontSize,
+        { lineBreak: false },
+      );
   }
 
   private renderMartyria(
