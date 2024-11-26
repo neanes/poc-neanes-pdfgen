@@ -44,8 +44,6 @@ export async function getFontDataWin32(
     maxBuffer: 1024 * 1024 * 100,
   });
 
-  //console.log((stdout as Buffer).length);
-
   return stdout;
 }
 

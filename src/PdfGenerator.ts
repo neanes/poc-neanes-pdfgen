@@ -24,8 +24,16 @@ import { PageSetup } from './support/neanes/models/PageSetup';
 import { Score } from './support/neanes/models/Score';
 import { Page } from './support/neanes/models/Page';
 import { defaultFonts, getFontData, getFontOptionsForScore } from './utils';
+import { FontRegistry } from './FontRegistry';
 
 export class PdfGenerator {
+  private fontRegistry: FontRegistry | null = null;
+
+  setFontRegistry(fontRegistry: FontRegistry) {
+    this.fontRegistry = fontRegistry;
+    return this;
+  }
+
   public async generate(score: Score, pages: Page[]) {
     const pageSetup = score.pageSetup;
     console.time('generate');
@@ -92,7 +100,8 @@ export class PdfGenerator {
       // TODO handle fonts that are not found
       doc.registerFont(
         options.key,
-        await getFontData(options.fontFamily, options.bold, options.italic),
+        this.fontRegistry?.getFontData(options.key) ??
+          (await getFontData(options.fontFamily, options.bold, options.italic)),
       );
     }
   }

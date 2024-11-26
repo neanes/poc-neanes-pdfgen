@@ -9,6 +9,7 @@ import { PdfGenerator } from './PdfGenerator';
 import { TextMeasurementService } from './support/neanes/services/TextMeasurementService';
 import { defaultFonts, getFontData, getFontOptionsForScore } from './utils';
 import { Score } from './support/neanes/models/Score';
+import { FontRegistry } from './FontRegistry';
 
 async function readScoreFile(filePath: string) {
   let data: string;
@@ -36,7 +37,7 @@ async function registerDefaultFonts() {
   await Promise.all(promises);
 }
 
-async function registerOtherFonts(score: Score) {
+async function registerOtherFonts(fontRegistry: FontRegistry, score: Score) {
   for (const options of getFontOptionsForScore(score)) {
     if (defaultFonts.has(options.key)) {
       continue;
@@ -45,10 +46,15 @@ async function registerOtherFonts(score: Score) {
     console.log(`Registering ${options.key}`);
 
     // TODO handle fonts that are not found
-    TextMeasurementService.registerFontByBuffer(
-      options.key,
-      await getFontData(options.fontFamily, options.bold, options.italic),
+    const data = await getFontData(
+      options.fontFamily,
+      options.bold,
+      options.italic,
     );
+
+    fontRegistry.registerFont(options.key, data);
+
+    TextMeasurementService.registerFontByBuffer(options.key, data);
   }
 }
 
@@ -58,13 +64,14 @@ if (process.argv[2]) {
   );
 
   console.time('fontkit: register fonts');
+  const fontRegistry = new FontRegistry();
   await registerDefaultFonts();
-  await registerOtherFonts(score);
+  await registerOtherFonts(fontRegistry, score);
   console.timeEnd('fontkit: register fonts');
 
   const pages = LayoutService.processPages(score);
 
-  await new PdfGenerator().generate(score, pages);
+  await new PdfGenerator().setFontRegistry(fontRegistry).generate(score, pages);
 } else {
   console.log('usage: npx tsx index.ts filename.byz|x');
 }
