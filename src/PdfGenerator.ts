@@ -3,6 +3,7 @@ import fs from 'fs';
 import PDFDocument from 'pdfkit';
 
 import {
+  ModeSign,
   Neume,
   TimeNeume,
   VocalExpressionNeume,
@@ -13,6 +14,7 @@ import {
   DropCapElement,
   ElementType,
   MartyriaElement,
+  ModeKeyElement,
   NoteElement,
   TextBoxElement,
 } from './support/neanes/models/Element';
@@ -60,6 +62,9 @@ export class PdfGenerator {
           } else if (element.elementType === ElementType.DropCap) {
             const dropCap = element as DropCapElement;
             this.renderDropCap(doc, dropCap);
+          } else if (element.elementType === ElementType.ModeKey) {
+            const modeKey = element as ModeKeyElement;
+            this.renderModeKey(doc, modeKey, pageSetup);
           }
         }
       }
@@ -519,6 +524,71 @@ export class PdfGenerator {
           { lineBreak: false },
         );
     }
+  }
+
+  private renderModeKey(
+    doc: PDFKit.PDFDocument,
+    modeKey: ModeKeyElement,
+    pageSetup: PageSetup,
+  ) {
+    const fontFamily = pageSetup.neumeDefaultFontFamily;
+    const fontSize = Unit.toPt(modeKey.computedFontSize);
+    const color = modeKey.computedColor;
+
+    doc.font(fontFamily).fontSize(fontSize).fillColor(color);
+
+    let text = this.getMapping(ModeSign.Ekhos).text;
+
+    if (modeKey.isPlagal) {
+      text += this.getMapping(ModeSign.Plagal).text;
+    }
+
+    if (modeKey.isVarys) {
+      text += this.getMapping(ModeSign.Varys).text;
+    }
+
+    const martyriaMapping = this.getMapping(modeKey.martyria);
+
+    text += martyriaMapping.text;
+
+    if (modeKey.note) {
+      text += this.getMapping(modeKey.note).text;
+    }
+
+    if (modeKey.fthoraAboveNote) {
+      text += this.getMapping(modeKey.fthoraAboveNote).text;
+    }
+
+    if (modeKey.quantitativeNeumeAboveNote) {
+      text += this.getMapping(modeKey.quantitativeNeumeAboveNote).text;
+    }
+
+    if (modeKey.note2) {
+      text += this.getMapping(modeKey.note2).text;
+    }
+
+    if (modeKey.fthoraAboveNote2) {
+      text += this.getMapping(modeKey.fthoraAboveNote2).text;
+    }
+
+    if (modeKey.quantitativeNeumeAboveNote2) {
+      text += this.getMapping(modeKey.quantitativeNeumeAboveNote2).text;
+    }
+
+    if (modeKey.quantitativeNeumeRight) {
+      text += this.getMapping(modeKey.quantitativeNeumeRight).text;
+    }
+
+    if (modeKey.fthoraAboveQuantitativeNeumeRight) {
+      text += this.getMapping(modeKey.fthoraAboveQuantitativeNeumeRight).text;
+    }
+
+    doc.text(text, Unit.toPt(modeKey.x), Unit.toPt(modeKey.y), {
+      lineBreak: false,
+      align: 'center',
+      width: Unit.toPt(modeKey.width),
+      features: martyriaMapping.salt != null ? ['salt'] : undefined,
+    });
   }
 
   private renderTextBox(doc: PDFKit.PDFDocument, textBox: TextBoxElement) {
