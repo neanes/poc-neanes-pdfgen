@@ -119,8 +119,10 @@ export class PdfGenerator {
 
     let mainTextOffsetX = Unit.toPt(note.x);
 
-    if (note.measureBarLeft) {
-      const mapping = this.getMapping(note.measureBarLeft);
+    if (note.measureBarLeft || note.computedMeasureBarLeft) {
+      const measureBarLeft = note.measureBarLeft ?? note.computedMeasureBarLeft;
+
+      const mapping = this.getMapping(measureBarLeft!);
 
       doc
         .fillColor(pageSetup.measureBarDefaultColor)
@@ -354,11 +356,14 @@ export class PdfGenerator {
       );
     }
 
-    if (note.measureBarRight) {
+    if (note.measureBarRight || note.computedMeasureBarRight) {
+      const measureBarRight =
+        note.measureBarRight ?? note.computedMeasureBarRight;
+
       doc
         .fillColor(pageSetup.measureBarDefaultColor)
         .text(
-          this.getMapping(note.measureBarRight).text,
+          this.getMapping(measureBarRight!).text,
           mainTextOffsetX +
             fontService.getAdvanceWidth(
               fontFamily,
@@ -498,11 +503,15 @@ export class PdfGenerator {
     martyria: MartyriaElement,
     pageSetup: PageSetup,
   ) {
-    doc
-      .font(pageSetup.neumeDefaultFontFamily)
-      .fontSize(Unit.toPt(pageSetup.neumeDefaultFontSize));
+    const fontFamily = pageSetup.neumeDefaultFontFamily;
+    const fontSize = Unit.toPt(pageSetup.neumeDefaultFontSize);
 
-    if (martyria.measureBarLeft) {
+    doc.font(fontFamily).fontSize(fontSize);
+
+    if (
+      martyria.measureBarLeft &&
+      !martyria.measureBarLeft?.endsWith('Above')
+    ) {
       doc
         .fillColor(pageSetup.measureBarDefaultColor)
         .text(
@@ -522,6 +531,22 @@ export class PdfGenerator {
         Unit.toPt(martyria.y),
         { lineBreak: false },
       );
+
+    if (martyria.measureBarLeft && martyria.measureBarLeft?.endsWith('Above')) {
+      const mark = this.getMapping(martyria.measureBarLeft).glyphName;
+      const base = this.getMapping(martyria.note).glyphName;
+
+      const offset = fontService.getMarkOffset(fontFamily, base, mark);
+
+      doc
+        .fillColor(pageSetup.measureBarDefaultColor)
+        .text(
+          this.getMapping(martyria.measureBarLeft).text,
+          Unit.toPt(martyria.x) + offset.x * fontSize,
+          Unit.toPt(martyria.y) + offset.y * fontSize,
+          { lineBreak: false },
+        );
+    }
 
     if (martyria.measureBarRight) {
       doc
@@ -687,8 +712,10 @@ export class PdfGenerator {
     }
 
     // Shift offset for measure bar
-    if (note.measureBarLeft) {
-      const glyphName = this.getMapping(note.measureBarLeft).glyphName;
+    if (note.measureBarLeft || note.computedMeasureBarLeft) {
+      const measureBarLeft = note.measureBarLeft ?? note.computedMeasureBarLeft;
+
+      const glyphName = this.getMapping(measureBarLeft!).glyphName;
 
       const width = fontService.getAdvanceWidth(fontFamily, glyphName);
       offset.x += width;
